@@ -23,3 +23,4 @@ class TestFrontendApp:
         animal.send_keys("Cat")
         animal.send_keys(Keys.ENTER)
         assert "No results found" not in driver.page_source
+        driver.quit()
