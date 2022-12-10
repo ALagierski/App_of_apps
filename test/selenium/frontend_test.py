@@ -1,32 +1,25 @@
-import unittest
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
+import pytest
 from os import environ
+from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 
-application_URL = environ.get('APPLICATION_URL', 'http://192.168.44.44:5000/')
-selenium_URL = environ.get('SELENIUM_URL', 'http://192.168.44.44:4444/wd/hub')
+APPLICATION_URL = environ.get('APPLICATION_URL', 'http://192.168.44.44:5000/')
+SELENIUM_URL = environ.get('SELENIUM_URL', 'http://192.168.44.44:4444/wd/hub')
 
+class TestFrontendApp:
 
-class AppTest(unittest.TestCase):
-    def setUp(self):
-        self.driver = webdriver.Firefox()
-        # self.driver = webdriver.Remote(
-        #     command_executor=selenium_URL,
-        #     options=webdriver.FirefoxOptions())
+    @pytest.fixture
+    def driver(self) -> webdriver.Firefox:
+        return webdriver.Firefox()
 
-    def test_our_app(self):
-        driver = self.driver
+    def test_our_app(self, driver: webdriver.Firefox):
         driver.set_page_load_timeout(5)
         driver.set_script_timeout(5)
-        driver.get(application_URL)
-        elem = driver.find_element(By.NAME, "name")
-        elem.send_keys("luka")
-        elem = driver.find_element(By.NAME, "animal")
-        elem.send_keys("dog")
-        elem.send_keys(Keys.RETURN)
-        self.assertNotIn("No results found.", driver.page_source)
-        driver.quit()
-
-if __name__ == "__main__":
-    unittest.main()
+        driver.get(APPLICATION_URL)
+        name = driver.find_element(By.NAME, "name")
+        name.send_keys("Aurora")
+        animal = driver.find_element(By.NAME, "animal")
+        animal.send_keys("Cat")
+        animal.send_keys(Keys.ENTER)
+        assert "No results found" not in driver.page_source
