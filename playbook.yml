@@ -1,0 +1,51 @@
+---
+- name: Deploy application
+  hosts: all
+  become: true
+  vars:
+    deployment_path: "/home/ubuntu/app"
+    compose_path: "./docker-compose.yml"
+
+  roles:
+    - geerlingguy.docker
+
+  tasks:
+    - name: Update apt-get repo and cache
+      ansible.builtin.apt:
+        update_cache: true
+        force_apt_get: true
+        cache_valid_time: 3600
+
+    - name: Install packages
+      ansible.builtin.package:
+        name:
+          - python3-pip
+        state: present
+
+    - name: Install docker-compose python module
+      ansible.builtin.pip:
+        name:
+          - docker
+          - docker-compose
+
+    - name: Create a directory if it does not exist
+      ansible.builtin.file:
+        path: "{{ deployment_path }}"
+        state: directory
+        mode: 0755
+
+    - name: Copy docker-compose
+      ansible.builtin.copy:
+        src: "{{ compose_path }}"
+        dest: "{{ deployment_path }}"
+        mode: 0755
+
+    - name: Run 'docker-compose up'
+      become: true
+      community.docker.docker_compose:
+        project_src: "{{ deployment_path }}"
+        build: true
+        debug: true
+      environment:
+        FRONTEND_IMAGE: "{{ lookup('ansible.builtin.env', 'FRONTEND_IMAGE') }}"
+        BACKEND_IMAGE: "{{ lookup('ansible.builtin.env', 'BACKEND_IMAGE') }}"
