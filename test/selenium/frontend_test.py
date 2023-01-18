@@ -10,8 +10,9 @@ SELENIUM_URL = environ.get('SELENIUM_URL', 'http://192.168.44.44:4444/wd/hub')
 class TestFrontendApp:
 
     @pytest.fixture
-    def driver(self) -> webdriver.Firefox:
-        return webdriver.Firefox()
+    def driver(self) -> webdriver.Remote:
+        return webdriver.Remote(command_executor=SELENIUM_URL,
+                                options=webdriver.FirefoxOptions())
 
     def test_our_app(self, driver: webdriver.Firefox):
         driver.set_page_load_timeout(5)
